@@ -10,7 +10,7 @@ let localpath = '';
 
 // Voice animation setup
 const maxHeight = 100;
-const numSquares = 7;
+const numSquares = 5;
 const centerIndex = Math.floor(numSquares / 2);
 const delayFrames = 3.0;
 const row = document.getElementById('wave-row');
@@ -141,7 +141,7 @@ function animateVoice() {
   }
 
   // Animate center-outward
-  const centerOutOrder = [3, 2, 4, 1, 5, 0, 6];
+  const centerOutOrder = [2, 1, 3, 0, 4];
   centerOutOrder.forEach((index, i) => {
     const el = squares[index];
     if (!el) return;
