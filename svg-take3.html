@@ -571,6 +571,18 @@
       <input type="text" placeholder="#hex" data-mode="user" data-layer="mid" data-stop="1">
       <input type="text" placeholder="#hex" data-mode="user" data-layer="mid" data-stop="2">
     </div>
+    <div class="editor-row">
+      <span class="row-label">RST BOT</span>
+      <input type="text" placeholder="#hex" data-mode="rest" data-layer="bottom" data-stop="0">
+      <input type="text" placeholder="#hex" data-mode="rest" data-layer="bottom" data-stop="1">
+      <input type="text" placeholder="#hex" data-mode="rest" data-layer="bottom" data-stop="2">
+    </div>
+    <div class="editor-row">
+      <span class="row-label">RST MID</span>
+      <input type="text" placeholder="#hex" data-mode="rest" data-layer="mid" data-stop="0">
+      <input type="text" placeholder="#hex" data-mode="rest" data-layer="mid" data-stop="1">
+      <input type="text" placeholder="#hex" data-mode="rest" data-layer="mid" data-stop="2">
+    </div>
   </div>
 
   <script>
@@ -585,6 +597,11 @@
           bottom: ['#A7FBFA', '#8CD2DA', '#6C84DD'],
           mid: ['#B6FDF8', '#5FC5D7', '#614FEE'],
           waveform: { start: [95, 197, 215], end: [97, 79, 238] }
+        },
+        rest: {
+          bottom: ['#FFFFFF', '#D9F6FF', '#FFFFFF'],
+          mid: ['#FFFFFF', '#D9F6FF', '#FFFFFF'],
+          waveform: { start: [98, 216, 78], end: [77, 213, 254] }
         }
       },
       purple: {
@@ -597,6 +614,11 @@
           bottom: ['#A8D0FF', '#7BA3E0', '#5B6BC0'],
           mid: ['#B8E0FF', '#8BB3F0', '#6B7BD0'],
           waveform: { start: [139, 179, 240], end: [91, 107, 192] }
+        },
+        rest: {
+          bottom: ['#FFFFFF', '#E8D9FF', '#FFFFFF'],
+          mid: ['#FFFFFF', '#E8D9FF', '#FFFFFF'],
+          waveform: { start: [199, 125, 255], end: [123, 44, 191] }
         }
       },
       custom: {
@@ -609,6 +631,11 @@
           bottom: ['#CC4400', '#CC6600', '#CC8800'],
           mid: ['#DD5511', '#DD7711', '#DD9911'],
           waveform: { start: [204, 102, 0], end: [204, 136, 0] }
+        },
+        rest: {
+          bottom: ['#FFFFFF', '#FFE8D9', '#FFFFFF'],
+          mid: ['#FFFFFF', '#FFE8D9', '#FFFFFF'],
+          waveform: { start: [255, 136, 0], end: [255, 187, 0] }
         }
       }
     };
@@ -653,7 +680,22 @@
 
     // Helper to get color set based on state
     function getColorSet(state) {
-      return (state === 'user-speaking') ? 'user' : 'ai';
+      if (state === 'user-speaking') return 'user';
+      if (state === 'system-at-rest' || state === 'system-thinking') return 'rest';
+      return 'ai';
+    }
+
+    // Helper to build gradient string based on color set
+    function buildGradient(colors, layer, colorSet) {
+      if (colorSet === 'rest') {
+        // Rest uses vertical gradient with 62% middle stop
+        return `linear-gradient(to bottom, ${colors[0]} 0%, ${colors[1]} 62%, ${colors[2]} 100%)`;
+      }
+      // AI and user use diagonal gradients
+      if (layer === 'bottom') {
+        return `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 50%, ${colors[2]} 100%)`;
+      }
+      return `linear-gradient(35deg, ${colors[0]} 0%, ${colors[1]} 54%, ${colors[2]} 100%)`;
     }
 
     // Set animation state with crossfade
@@ -683,8 +725,8 @@
       // Set new colors on incoming layer
       const bottomNew = document.querySelector(`.layer-bottom .circle-${newActive}`);
       const midNew = document.querySelector(`.layer-mid .circle-${newActive}`);
-      bottomNew.style.background = `linear-gradient(135deg, ${theme.bottom[0]} 0%, ${theme.bottom[1]} 50%, ${theme.bottom[2]} 100%)`;
-      midNew.style.background = `linear-gradient(35deg, ${theme.mid[0]} 0%, ${theme.mid[1]} 54%, ${theme.mid[2]} 100%)`;
+      bottomNew.style.background = buildGradient(theme.bottom, 'bottom', colorSet);
+      midNew.style.background = buildGradient(theme.mid, 'mid', colorSet);
 
       // Crossfade
       document.querySelectorAll('.circle-a').forEach(el => {
@@ -711,8 +753,8 @@
       const bottomNew = document.querySelector(`.layer-bottom .circle-${newActive}`);
       const midNew = document.querySelector(`.layer-mid .circle-${newActive}`);
 
-      bottomNew.style.background = `linear-gradient(135deg, ${theme.bottom[0]} 0%, ${theme.bottom[1]} 50%, ${theme.bottom[2]} 100%)`;
-      midNew.style.background = `linear-gradient(35deg, ${theme.mid[0]} 0%, ${theme.mid[1]} 54%, ${theme.mid[2]} 100%)`;
+      bottomNew.style.background = buildGradient(theme.bottom, 'bottom', colorSet);
+      midNew.style.background = buildGradient(theme.mid, 'mid', colorSet);
 
       // Crossfade: fade in new, fade out old
       document.querySelectorAll('.circle-a').forEach(el => {
@@ -760,19 +802,19 @@
           const theme = themes.custom[colorSet];
           const activeCircleBottom = document.querySelector(`.layer-bottom .circle-${activeLayer}`);
           const activeCircleMid = document.querySelector(`.layer-mid .circle-${activeLayer}`);
-          activeCircleBottom.style.background = `linear-gradient(135deg, ${theme.bottom[0]} 0%, ${theme.bottom[1]} 50%, ${theme.bottom[2]} 100%)`;
-          activeCircleMid.style.background = `linear-gradient(35deg, ${theme.mid[0]} 0%, ${theme.mid[1]} 54%, ${theme.mid[2]} 100%)`;
+          activeCircleBottom.style.background = buildGradient(theme.bottom, 'bottom', colorSet);
+          activeCircleMid.style.background = buildGradient(theme.mid, 'mid', colorSet);
         }
       }
     }
 
-    // Init - set initial theme on circle-a
+    // Init - set initial theme on circle-a (starts in rest state)
     function init() {
-      const theme = themes.green.ai; // Start with AI colors
+      const theme = themes.green.rest;
       document.querySelector('.layer-bottom .circle-a').style.background =
-        `linear-gradient(135deg, ${theme.bottom[0]} 0%, ${theme.bottom[1]} 50%, ${theme.bottom[2]} 100%)`;
+        buildGradient(theme.bottom, 'bottom', 'rest');
       document.querySelector('.layer-mid .circle-a').style.background =
-        `linear-gradient(35deg, ${theme.mid[0]} 0%, ${theme.mid[1]} 54%, ${theme.mid[2]} 100%)`;
+        buildGradient(theme.mid, 'mid', 'rest');
     }
 
     init();
