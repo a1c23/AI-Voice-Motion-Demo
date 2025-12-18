@@ -1,0 +1,48 @@
+.stage{
+  position: relative;
+  height: 100%;
+}
+
+/* the sharp circle */
+.circle{
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  /*background: #0A39FF;*/
+  background: linear-gradient(
+    135deg,
+    #ff6b6b 0%,
+    #4ecdc4 50%,
+    #45b7d1 100%
+  );
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* blur “field” */
+.blur{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 700px;
+  height: 700px;
+  transform: translate(-50%, -50%);
+
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+
+  /* must have some fill for consistent rendering */
+  background: rgba(255,255,255,0.01);
+  pointer-events: none;
+
+  /* progressive blur: left = strong, right = none */
+  -webkit-mask-image: linear-gradient(to right, black 0%, black 45%, rgba(0,0,0,0.25) 60%, transparent 100%);
+  mask-image: linear-gradient(to right, black 0%, black 45%, rgba(0,0,0,0.25) 60%, transparent 100%);
+
+  /* hide the rectangle boundary completely */
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
